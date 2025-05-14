@@ -1,0 +1,41 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      target: runtime
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/code:delegated
+    depends_on:
+      - db
+      - chromadb
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/postgres
+      CHROMA_HOST: chromadb
+      CHROMA_PORT: "8000"
+
+  db:
+    image: postgres:17.4
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "54321:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  chromadb:
+    image: chromadb/chroma:1.0.7
+    ports:
+      - "8001:8000"
+    volumes:
+      - chroma_data:/chroma/.chromadb
+
+volumes:
+  pgdata:
+  chroma_data:
